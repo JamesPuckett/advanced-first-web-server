@@ -21,7 +21,8 @@
   "homepage": "https://github.com/AustinCodingAcademy/advanced-first-web-server#readme",
   "dependencies": {
     "body-parser": "^1.17.2",
-    "express": "^4.15.3"
+    "express": "^4.15.3",
+    "mongoose": "^4.10.4"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",

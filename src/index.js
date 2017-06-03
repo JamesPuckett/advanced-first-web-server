@@ -1,27 +1,37 @@
-// Your server code here...
-
 import express from 'express';
 import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import UserRoutes from './routes/UserRoutes';
 
+
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/q2-contact-list/');
+
+
+const PORT = 3000;
 const app = express();
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+  // we're connected!
+  console.log('MondgoDB connected');
+});
+
+
 app.use(bodyParser.json());
+app.use(UserRoutes);
 
-const PORT = 3001;
 
-const users = [
-  {
-    id: 1, 
-    name: 'wurst'
-  }, 
-  {
-    id: 2, 
-    name: 'ale'
-  },
-  {
-    id: 3,
-    name: 'Shnictzel'
-  }
-];
+app.use((request, response, next) => {
+  console.log('Middleware executed');
+  next();
+});
+// eslint-disable-next-line
+app.use((err, request, response, next) => {
+  console.log('Error Middleware', err);
+  return response.status(500).json({message: err.message});
+});
+
 
 app.get('/', (request, response) => {
   console.log('route was called');
@@ -33,33 +43,9 @@ app.get('/', (request, response) => {
   ]);
 });
 
-app.get('/users', (request, response) => {
-  return response.json(users);
-});
-
-app.post('/users', (request, response) => {
-  console.log(request.body);
-  const user = {
-    id: users.length + 1,
-    ...request.body
-  };
-  users.push(user);
-  return response.json(user);
-});
-
-app.get('/users/:id', (request, response) => {
-  const foundUser = users.find((user) => {
-    return String(user.id) === request.params.id;
-  });
-  return response.json(foundUser || null);
-});
-
-app.delete('/users/:id', (request, response) => {
-  const foundUser = users.find((user) => {
-    return String(user.id) === request.params.id;
-  });
-  // delete user
-  return response.json(foundUser || null);
+app.get('/err', (request, response, next) => {
+  console.log('ERR route was called');
+  return next(new Error('Error is thrown'));
 });
 
 app.get('/*', (request, response) => {
@@ -74,9 +60,3 @@ app.listen(PORT, (err) => {
   }
   return console.log('listening on port ' + PORT);
 });
-
-//  app.all('/', (request, response) => {
-//    return response.json({
-//      hello: 'world'
-//    });
-//  });
